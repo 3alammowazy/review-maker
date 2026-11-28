@@ -123,7 +123,7 @@ function draw(){
   glowEllipse(cx,hz+40*S,400*S,70*S,90*S,css(light,.6));
   ctx.fillStyle=css(light,.2);ctx.fillRect(0,hz-S,W,2*S);
   const rf=mk(bw,ch),rx=rf.getContext('2d');rx.translate(0,ch);rx.scale(1,-1);rx.drawImage(B.c,0,0);rx.setTransform(1,0,0,1,0,0);rx.globalCompositeOperation='destination-in';const rg=rx.createLinearGradient(0,0,0,ch*.35);rg.addColorStop(0,'rgba(0,0,0,.28)');rg.addColorStop(1,'rgba(0,0,0,0)');rx.fillStyle=rg;rx.fillRect(0,0,bw,ch);
-  ctx.drawImage(rf,0,0,bw,Math.min(ch*.35,H-hz),bx,hz+4*S,bw,Math.min(ch*.35,H-hz));
+  if(!sq)ctx.drawImage(rf,0,0,bw,Math.min(ch*.35,H-hz),bx,hz+4*S,bw,Math.min(ch*.35,H-hz));
   glowEllipse(cx,hz+2*S,bw/2+10*S,12*S,20*S,'rgba(0,0,0,.75)');
   ctx.drawImage(B.c,bx,by);
   const vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.max(W,H)*.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.42)');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
@@ -141,10 +141,16 @@ function draw(){
       if(st.rating){ctx.font=`${34*S}px serif`;ctx.fillStyle=acc;ctx.fillText('★'.repeat(st.rating)+'☆'.repeat(5-st.rating),r,y+10*S)}
       ctx.drawImage(st.logo,70*S,H-62*S-lh,lw,lh);
     } else {
-      let y=hz+86*S;ctx.textAlign='center';
-      if(title){const w=wrap(title,W-180*S,50*S,2);ctx.fillStyle='#fff';w.lines.forEach(l=>{ctx.fillText(l,W/2,y);y+=w.s*1.3})}
-      if(author){ctx.font=`400 ${26*S}px "Noto Kufi Arabic",sans-serif`;ctx.fillStyle='rgba(225,229,238,.85)';ctx.fillText(author,W/2,y+6*S);y+=56*S}
-      if(st.rating){ctx.font=`${32*S}px serif`;ctx.fillStyle=acc;ctx.fillText('★'.repeat(st.rating)+'☆'.repeat(5-st.rating),W/2,y+6*S)}
+      ctx.textAlign='center';
+      const w=title?wrap(title,W-180*S,50*S,2):null;
+      const kH=22*S,kGap=40*S,tH=w?w.s*1.3*w.lines.length:0,aH=author?44*S:0,sH=st.rating?44*S:0;
+      const top=hz+44*S,bottom=H-56*S-lh-34*S,total=kH+kGap+tH+aH+sH;
+      let y=top+Math.max(0,(bottom-top-total)/2)+kH;
+      ctx.font=`400 ${22*S}px "Noto Kufi Arabic",sans-serif`;ctx.fillStyle=acc;ctx.fillText('مراجعة',W/2,y);
+      ctx.fillRect(W/2-30*S,y+14*S,60*S,3*S);y+=kGap;
+      if(w){ctx.font=`700 ${w.s}px "Noto Naskh Arabic",serif`;ctx.fillStyle='#fff';w.lines.forEach(l=>{y+=w.s*1.15;ctx.fillText(l,W/2,y);y+=w.s*.15})}
+      if(author){y+=aH;ctx.font=`400 ${26*S}px "Noto Kufi Arabic",sans-serif`;ctx.fillStyle='rgba(225,229,238,.85)';ctx.fillText(author,W/2,y-8*S)}
+      if(st.rating){y+=sH;ctx.font=`${32*S}px serif`;ctx.fillStyle=acc;ctx.fillText('★'.repeat(st.rating)+'☆'.repeat(5-st.rating),W/2,y-4*S)}
       ctx.drawImage(st.logo,W/2-lw/2,H-56*S-lh,lw,lh);
     }
   } else ctx.drawImage(st.logo,W/2-lw/2,H-62*S-lh,lw,lh);
