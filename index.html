@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>صانع صور المراجعات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Noto+Kufi+Arabic:wght@400;600&family=Noto+Serif:wght@700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: quiet, bookish, a one-person studio tool
    IDEA: a book standing in a lit doorway, the door to its world
@@ -104,11 +104,14 @@ function book(img,ch){
   x.strokeStyle='rgba(0,0,0,.35)';x.beginPath();x.moveTo(cw+th,k*.5);x.lineTo(cw+th,ch-k*.35);x.stroke();
   return{c,cw,th};
 }
+const isLatin=t=>!/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(t);
+const titleFam=t=>isLatin(t)?'"Noto Serif",serif':'"Noto Naskh Arabic",serif';
 function wrap(text,maxW,size,maxLines){
-  for(let s=size;s>=size*.62;s-=2){ctx.font=`700 ${s}px "Noto Naskh Arabic",serif`;const words=text.split(/\s+/);let lines=[],cur='';
+  const fam=titleFam(text);ctx.direction=isLatin(text)?'ltr':'rtl';
+  for(let s=size;s>=size*.62;s-=2){ctx.font=`700 ${s}px ${fam}`;const words=text.split(/\s+/);let lines=[],cur='';
     for(const w of words){const t=cur?cur+' '+w:w;if(ctx.measureText(t).width>maxW&&cur){lines.push(cur);cur=w}else cur=t}lines.push(cur);
-    if(lines.length<=maxLines)return{lines,s}}
-  return{lines:[text],s:size*.62};
+    if(lines.length<=maxLines)return{lines,s,fam}}
+  return{lines:[text],s:size*.62,fam};
 }
 function draw(){
   const sq=st.size==='sq',W=(sq?1080:1200)*S,H=(sq?1080:675)*S;cv.width=W;cv.height=H;
@@ -136,19 +139,19 @@ function draw(){
       const r=Math.round(W*.47);let y=Math.round(H*.27);
       ctx.textAlign='right';ctx.font=`400 ${22*S}px "Noto Kufi Arabic",sans-serif`;ctx.fillStyle=acc;ctx.fillText('مراجعة',r,y);
       ctx.fillRect(r-60*S,y+14*S,60*S,3*S);y+=86*S;
-      if(title){const w=wrap(title,r-70*S,56*S,2);ctx.fillStyle='#fff';w.lines.forEach(l=>{ctx.fillText(l,r,y);y+=w.s*1.35});y-=w.s*.2}
+      if(title){const w=wrap(title,r-70*S,56*S,2);ctx.fillStyle='#fff';w.lines.forEach(l=>{ctx.fillText(l,r,y);y+=w.s*1.35});y-=w.s*.2;ctx.direction='rtl'}
       if(author){ctx.font=`400 ${26*S}px "Noto Kufi Arabic",sans-serif`;ctx.fillStyle='rgba(225,229,238,.85)';ctx.fillText(author,r,y+18*S);y+=70*S}
       if(st.rating){ctx.font=`${34*S}px serif`;ctx.fillStyle=acc;ctx.fillText('★'.repeat(st.rating)+'☆'.repeat(5-st.rating),r,y+10*S)}
       ctx.drawImage(st.logo,70*S,H-62*S-lh,lw,lh);
     } else {
       ctx.textAlign='center';
-      const w=title?wrap(title,W-180*S,50*S,2):null;
+      const w=title?wrap(title,W-180*S,50*S,2):null;ctx.direction="rtl";
       const kH=22*S,kGap=18*S,tH=w?w.s*1.3*w.lines.length:0,aH=author?44*S:0,sH=st.rating?44*S:0;
       const top=hz+44*S,bottom=H-56*S-lh-34*S,total=kH+kGap+tH+aH+sH;
       let y=top+Math.max(0,(bottom-top-total)/2)+kH;
       ctx.font=`400 ${22*S}px "Noto Kufi Arabic",sans-serif`;ctx.fillStyle=acc;ctx.fillText('مراجعة',W/2,y);
       ctx.fillRect(W/2-30*S,y+14*S,60*S,3*S);y+=kGap;
-      if(w){ctx.font=`700 ${w.s}px "Noto Naskh Arabic",serif`;ctx.fillStyle='#fff';w.lines.forEach(l=>{y+=w.s*1.15;ctx.fillText(l,W/2,y);y+=w.s*.15})}
+      if(w){ctx.font=`700 ${w.s}px ${w.fam}`;ctx.direction=isLatin(title)?'ltr':'rtl';ctx.fillStyle='#fff';w.lines.forEach(l=>{y+=w.s*1.15;ctx.fillText(l,W/2,y);y+=w.s*.15});ctx.direction='rtl'}
       if(author){y+=aH;ctx.font=`400 ${26*S}px "Noto Kufi Arabic",sans-serif`;ctx.fillStyle='rgba(225,229,238,.85)';ctx.fillText(author,W/2,y-8*S)}
       if(st.rating){y+=sH;ctx.font=`${32*S}px serif`;ctx.fillStyle=acc;ctx.fillText('★'.repeat(st.rating)+'☆'.repeat(5-st.rating),W/2,y-4*S)}
       ctx.drawImage(st.logo,W/2-lw/2,H-56*S-lh,lw,lh);
@@ -185,7 +188,7 @@ document.getElementById('save').addEventListener('click',()=>{
     note.textContent='لم يتح الحفظ المباشر هنا. اضغط مطوّلًا أو بالزر الأيمن على الصورة أدناه واختر «حفظ الصورة».';
   },'image/png');
 });
-const fontsReady=document.fonts?Promise.all([document.fonts.load('700 40px "Noto Naskh Arabic"'),document.fonts.load('400 20px "Noto Kufi Arabic"')]).catch(()=>{}):Promise.resolve();
+const fontsReady=document.fonts?Promise.all([document.fonts.load('700 40px "Noto Naskh Arabic"'),document.fonts.load('400 20px "Noto Kufi Arabic"'),document.fonts.load('700 40px "Noto Serif"')]).catch(()=>{}):Promise.resolve();
 Promise.all([load(svgURL('#ffffff','#ffffff')),fontsReady]).then(([l])=>{st.logo=l;setCover(SAMPLE,null)});
 if(window.claude&&claude.use)claude.use('downloads').then(d=>{dl=d}).catch(()=>{});
 }
