@@ -143,7 +143,7 @@ function draw(){
     } else {
       ctx.textAlign='center';
       const w=title?wrap(title,W-180*S,50*S,2):null;
-      const kH=22*S,kGap=40*S,tH=w?w.s*1.3*w.lines.length:0,aH=author?44*S:0,sH=st.rating?44*S:0;
+      const kH=22*S,kGap=18*S,tH=w?w.s*1.3*w.lines.length:0,aH=author?44*S:0,sH=st.rating?44*S:0;
       const top=hz+44*S,bottom=H-56*S-lh-34*S,total=kH+kGap+tH+aH+sH;
       let y=top+Math.max(0,(bottom-top-total)/2)+kH;
       ctx.font=`400 ${22*S}px "Noto Kufi Arabic",sans-serif`;ctx.fillStyle=acc;ctx.fillText('مراجعة',W/2,y);
